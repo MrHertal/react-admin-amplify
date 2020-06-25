@@ -54,7 +54,7 @@ test("get query variables with incomplete filter", () => {
   expect(queryVariables).toBeNull();
 });
 
-test("get query variables with invalid partition key", () => {
+test("get query variables with invalid hash key", () => {
   const filter = {
     ordersByProduct: {
       productId: null,
@@ -66,7 +66,7 @@ test("get query variables with invalid partition key", () => {
   expect(queryVariables).toBeNull();
 });
 
-test("get query variables with valid partition key", () => {
+test("get query variables with valid hash key", () => {
   const filter = {
     ordersByProduct: {
       productId: "product1",
@@ -133,6 +133,25 @@ test("get query variables with invalid sort key", () => {
       id: {
         eq: undefined,
       },
+    },
+  };
+
+  const queryVariables = Filter.getQueryVariables(filter);
+
+  expect(queryVariables).toEqual({
+    productId: "product1",
+  });
+});
+
+test("get query variables with incomplete composite sort key", () => {
+  const filter = {
+    ordersByProduct: {
+      statusDate: {
+        eq: {
+          status: "pending",
+        },
+      },
+      productId: "product1",
     },
   };
 

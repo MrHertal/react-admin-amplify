@@ -34,24 +34,24 @@ export class Filter {
       delete queryParams[bannedKeyName];
     }
 
-    // Case when there is only the partition key
+    // Case when there is only the hash key
     if (this.isObjectOfLength(queryParams, 1)) {
       const onlyParam = Object.values(queryParams)[0];
 
-      if (this.isPartitionKey(onlyParam)) {
+      if (this.isHashKeyValid(onlyParam)) {
         return queryParams;
       }
 
       return null;
     }
 
-    // Case when there are the partition key and the sort key
+    // Case when there are the hash key and the sort key
     if (this.isObjectOfLength(queryParams, 2)) {
       const firstParam = Object.values(queryParams)[0];
       const secondParam = Object.values(queryParams)[1];
 
-      if (this.isPartitionKey(firstParam)) {
-        if (this.isSortKey(secondParam)) {
+      if (this.isHashKeyValid(firstParam)) {
+        if (this.isSortKeyValid(secondParam)) {
           return queryParams;
         }
 
@@ -60,8 +60,8 @@ export class Filter {
         };
       }
 
-      if (this.isPartitionKey(secondParam)) {
-        if (this.isSortKey(firstParam)) {
+      if (this.isHashKeyValid(secondParam)) {
+        if (this.isSortKeyValid(firstParam)) {
           return queryParams;
         }
 
@@ -90,11 +90,11 @@ export class Filter {
     return typeof str === "string" && str !== "";
   }
 
-  static isPartitionKey(str: unknown): boolean {
+  static isHashKeyValid(str: unknown): boolean {
     return this.isString(str);
   }
 
-  static isSortKey(obj: unknown): boolean {
+  static isSortKeyValid(obj: unknown): boolean {
     if (!this.isObjectOfLength(obj, 1)) {
       return false;
     }
@@ -111,7 +111,7 @@ export class Filter {
       return true;
     }
 
-    if (this.isObject(keyInput) && Object.keys(keyInput).length > 0) {
+    if (this.isObject(keyInput) && Object.keys(keyInput).length > 1) {
       for (const sortField in keyInput) {
         if (!this.isString(keyInput[sortField])) {
           return false;
