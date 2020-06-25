@@ -422,3 +422,11 @@ test("delete many", async () => {
     data: ["resource1", "resource2"],
   });
 });
+
+test("get unknown query", () => {
+  const dataProvider = new DataProvider({ queries, mutations });
+
+  expect(() => {
+    dataProvider.getQuery("unknownQuery");
+  }).toThrow();
+});
