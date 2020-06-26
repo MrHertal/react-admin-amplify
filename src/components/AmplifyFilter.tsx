@@ -56,22 +56,23 @@ function getKeys(children: React.ReactNodeArray): Keys {
 }
 
 export const AmplifyFilter: React.FC<{
-  children: React.ReactNodeArray | null;
   defaultQuery: string;
-  setQuery: React.Dispatch<string> | null;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  filterValues: {};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setFilters: any;
+  setQuery?: React.Dispatch<string>;
 }> = ({ children, defaultQuery, setQuery = null, ...propsRest }) => {
-  if (!children) {
+  const childrenProp = children as React.ReactNodeArray | null;
+
+  if (!childrenProp) {
     throw new Error("AmplifyFilter has no children");
   }
 
   // First checks if children source props are well formatted
-  const keys = getKeys(children);
+  const keys = getKeys(childrenProp);
 
-  const { filterValues } = propsRest;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rest = propsRest as any;
+
+  const filterValues = rest.filterValues;
+  const setFilters = rest.setFilters;
 
   // Determines which query will be executed depending on the filter
   let query = defaultQuery;
@@ -81,8 +82,8 @@ export const AmplifyFilter: React.FC<{
     const filterHashKey = filterValues[query][keys[query].hashKey];
 
     // Case when filter values do not contain mandatory hash key
-    if (!filterHashKey && propsRest.setFilters) {
-      propsRest.setFilters({});
+    if (!filterHashKey && setFilters) {
+      setFilters({});
     }
   }
 
@@ -117,5 +118,5 @@ export const AmplifyFilter: React.FC<{
     return showFilter(queryName) && notBlank(hashKeySource) && input;
   }
 
-  return <Filter {...propsRest}>{children.map(renderInput)}</Filter>;
+  return <Filter {...rest}>{childrenProp.map(renderInput)}</Filter>;
 };

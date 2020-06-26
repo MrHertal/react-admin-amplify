@@ -15,8 +15,8 @@ const defaultOptions: AmplifyAdminOptions = {
 
 export const AmplifyAdmin: React.FC<{
   operations: Operations;
-  options: AmplifyAdminOptions;
-}> = ({ operations, options = defaultOptions, children }) => {
+  options?: AmplifyAdminOptions;
+}> = ({ children, operations, options = defaultOptions, ...propsRest }) => {
   const [authProvider, setAuthProvider] = useState<AuthProvider | null>(null);
   const [dataProvider, setDataProvider] = useState<DataProvider | null>(null);
 
@@ -40,7 +40,11 @@ export const AmplifyAdmin: React.FC<{
   }
 
   return (
-    <Admin authProvider={authProvider} dataProvider={dataProvider}>
+    <Admin
+      {...propsRest}
+      authProvider={authProvider}
+      dataProvider={dataProvider}
+    >
       {children}
     </Admin>
   );
