@@ -19,7 +19,8 @@ import {
   UpdateParams,
   UpdateResult,
 } from "ra-core";
-import { Paginator } from "./Paginator";
+import { Filter } from "./Filter";
+import { Pagination } from "./Pagination";
 
 export interface Operations {
   queries: Record<string, string>;
@@ -54,23 +55,32 @@ export class DataProvider {
     resource: string,
     params: GetListParams
   ): Promise<GetListResult> => {
-    let [queryName, queryVariables] = this.applyFilter(params.filter);
+    const { filter } = params;
 
-    if (!queryName) {
+    let queryName = Filter.getQueryName(this.queries, filter);
+    let queryVariables = Filter.getQueryVariables(filter);
+
+    if (!queryName || !queryVariables) {
       // Default list query without filter
       queryName = `list${resource.charAt(0).toUpperCase() + resource.slice(1)}`;
-      if (!this.queries[queryName]) {
-        console.log(`Could not find query ${queryName}`);
-        throw new Error("Data provider error");
-      }
     }
+
+    const query = this.getQuery(queryName);
 
     if (!queryVariables) {
       queryVariables = {};
     }
 
     const { page, perPage } = params.pagination;
-    const nextToken = Paginator.getNextToken(queryName, queryVariables, page);
+
+    // Defines a unique identifier of the query
+    const querySignature = JSON.stringify({
+      queryName,
+      queryVariables,
+      perPage,
+    });
+
+    const nextToken = Pagination.getNextToken(querySignature, page);
 
     // Checks if page requested is out of range
     if (typeof nextToken === "undefined") {
@@ -87,7 +97,7 @@ export class DataProvider {
 
     // Executes the query
     const queryData = (
-      await this.graphql(this.queries[queryName], {
+      await this.graphql(query, {
         ...queryVariables,
         limit: perPage,
         nextToken,
@@ -95,12 +105,7 @@ export class DataProvider {
     )[queryName];
 
     // Saves next token
-    Paginator.saveNextToken(
-      queryData.nextToken,
-      queryName,
-      queryVariables,
-      page
-    );
+    Pagination.saveNextToken(queryData.nextToken, querySignature, page);
 
     // Computes total
     let total = (page - 1) * perPage + queryData.items.length;
@@ -121,17 +126,10 @@ export class DataProvider {
     const queryName = `get${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.queries[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     // Executes the query
-    const queryData = (
-      await this.graphql(this.queries[queryName], {
-        id: params.id,
-      })
-    )[queryName];
+    const queryData = (await this.graphql(query, { id: params.id }))[queryName];
 
     return {
       data: queryData,
@@ -145,21 +143,14 @@ export class DataProvider {
     const queryName = `get${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.queries[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     const queriesData = [];
 
     // Executes the queries
     for (const id of params.ids) {
       try {
-        const queryData = (
-          await this.graphql(this.queries[queryName], {
-            id,
-          })
-        )[queryName];
+        const queryData = (await this.graphql(query, { id }))[queryName];
         queriesData.push(queryData);
       } catch (e) {
         console.log(e);
@@ -177,6 +168,8 @@ export class DataProvider {
   ): Promise<GetManyReferenceResult> => {
     const target = params.target.split(".");
 
+    // Target is used to build the filter
+    // It must be like: queryName.resourceID
     if (target.length !== 2) {
       throw new Error("Data provider error");
     }
@@ -199,17 +192,12 @@ export class DataProvider {
     const queryName = `create${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.mutations[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     // Executes the query
-    const queryData = (
-      await this.graphql(this.mutations[queryName], {
-        input: params.data,
-      })
-    )[queryName];
+    const queryData = (await this.graphql(query, { input: params.data }))[
+      queryName
+    ];
 
     return {
       data: queryData,
@@ -223,10 +211,7 @@ export class DataProvider {
     const queryName = `update${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.mutations[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     // Removes non editable fields
     const { data } = params;
@@ -236,11 +221,7 @@ export class DataProvider {
     delete data.updatedAt;
 
     // Executes the query
-    const queryData = (
-      await this.graphql(this.mutations[queryName], {
-        input: data,
-      })
-    )[queryName];
+    const queryData = (await this.graphql(query, { input: data }))[queryName];
 
     return {
       data: queryData,
@@ -256,10 +237,7 @@ export class DataProvider {
     const queryName = `update${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.mutations[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     // Removes non editable fields
     const { data } = params;
@@ -273,9 +251,7 @@ export class DataProvider {
     // Executes the queries
     for (const id of params.ids) {
       try {
-        await this.graphql(this.mutations[queryName], {
-          input: { ...data, id },
-        });
+        await this.graphql(query, { input: { ...data, id } });
         ids.push(id);
       } catch (e) {
         console.log(e);
@@ -294,10 +270,7 @@ export class DataProvider {
     const queryName = `delete${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.mutations[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     const { id, previousData } = params;
     const data = { id } as Record<string, unknown>;
@@ -307,11 +280,7 @@ export class DataProvider {
     }
 
     // Executes the query
-    const queryData = (
-      await this.graphql(this.mutations[queryName], {
-        input: data,
-      })
-    )[queryName];
+    const queryData = (await this.graphql(query, { input: data }))[queryName];
 
     return {
       data: queryData,
@@ -325,19 +294,14 @@ export class DataProvider {
     const queryName = `delete${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
-    if (!this.mutations[queryName]) {
-      console.log(`Could not find query ${queryName}`);
-      throw new Error("Data provider error");
-    }
+    const query = this.getQuery(queryName);
 
     const ids = [];
 
     // Executes the queries
     for (const id of params.ids) {
       try {
-        await this.graphql(this.mutations[queryName], {
-          input: { id },
-        });
+        await this.graphql(query, { input: { id } });
         ids.push(id);
       } catch (e) {
         console.log(e);
@@ -349,28 +313,18 @@ export class DataProvider {
     };
   };
 
-  public applyFilter(
-    filter: Record<string, unknown>
-  ): [string | undefined, Record<string, unknown> | undefined] {
-    let queryName, queryVariables;
-
-    // Checks if filter is empty
-    if (!Object.keys(filter)[0]) {
-      return [queryName, queryVariables];
+  public getQuery(queryName: string): string {
+    if (this.queries[queryName]) {
+      return this.queries[queryName];
     }
 
-    // Filter name is the name of the query to execute
-    const filterName = Object.keys(filter)[0];
-
-    if (!this.queries[filterName]) {
-      console.log(`Could not find query ${filterName}`);
-      throw new Error("Data provider error");
+    if (this.mutations[queryName]) {
+      return this.mutations[queryName];
     }
 
-    // Filter variables are the variables of the query
-    const filterVariables = <Record<string, unknown>>filter[filterName];
+    console.log(`Could not find query ${queryName}`);
 
-    return [filterName, filterVariables];
+    throw new Error("Data provider error");
   }
 
   public async graphql(
