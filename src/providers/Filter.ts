@@ -90,8 +90,8 @@ export class Filter {
     return typeof str === "string" && str !== "";
   }
 
-  static isHashKeyValid(str: unknown): boolean {
-    return this.isString(str);
+  static isHashKeyValid(key: unknown): boolean {
+    return this.isString(key) || typeof key === "number";
   }
 
   static isSortKeyValid(obj: unknown): boolean {
@@ -107,13 +107,13 @@ export class Filter {
 
     const keyInput = Object.values(key)[0] as Record<string, unknown>;
 
-    if (this.isString(keyInput)) {
+    if (this.isHashKeyValid(keyInput)) {
       return true;
     }
 
     if (this.isObject(keyInput) && Object.keys(keyInput).length > 1) {
       for (const sortField in keyInput) {
-        if (!this.isString(keyInput[sortField])) {
+        if (!this.isHashKeyValid(keyInput[sortField])) {
           return false;
         }
       }
