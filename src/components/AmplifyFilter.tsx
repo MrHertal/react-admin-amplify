@@ -10,11 +10,20 @@ interface Keys {
 }
 
 // Extracts hash and sort keys from source props
-function getKeys(children: React.ReactNodeArray): Keys {
+function getKeys(filters: React.ReactNodeArray): Keys {
   const keys = {};
 
-  for (const child of children) {
-    const input = child as { props: { source: string } };
+  for (const filter of filters) {
+    if (filter === null || typeof filter !== "object") {
+      throw new Error("AmplifyFilter children are invalid");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const input = filter as any;
+
+    if (!input.props || !input.props.source) {
+      throw new Error("AmplifyFilter children are invalid");
+    }
 
     const source = input.props.source;
     const sourceSplit = source.split(".");
@@ -59,14 +68,22 @@ export const AmplifyFilter: React.FC<{
   defaultQuery: string;
   setQuery?: React.Dispatch<string>;
 }> = ({ children, defaultQuery, setQuery = null, ...propsRest }) => {
-  const childrenProp = children as React.ReactNodeArray | null;
+  let filters;
 
-  if (!childrenProp) {
-    throw new Error("AmplifyFilter has no children");
+  if (children !== null && typeof children === "object") {
+    filters = [children];
+  }
+
+  if (Array.isArray(children)) {
+    filters = children;
+  }
+
+  if (!filters) {
+    throw new Error("AmplifyFilter children are invalid");
   }
 
   // First checks if children source props are well formatted
-  const keys = getKeys(childrenProp);
+  const keys = getKeys(filters);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rest = propsRest as any;
@@ -101,8 +118,9 @@ export const AmplifyFilter: React.FC<{
     return !!filter.split(".").reduce((o, i) => (!o ? o : o[i]), filterValues);
   }
 
-  function renderInput(child: React.ReactNode) {
-    const input = child as { props: { source: string } };
+  function renderInput(filter: React.ReactNode) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const input = filter as any;
 
     const source = input.props.source;
     const sourceSplit = source.split(".");
@@ -118,5 +136,5 @@ export const AmplifyFilter: React.FC<{
     return showFilter(queryName) && notBlank(hashKeySource) && input;
   }
 
-  return <Filter {...rest}>{childrenProp.map(renderInput)}</Filter>;
+  return <Filter {...rest}>{filters.map(renderInput)}</Filter>;
 };

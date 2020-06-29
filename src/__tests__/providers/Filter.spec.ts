@@ -227,3 +227,37 @@ test("get query variables with valid sort key inputs", () => {
     },
   });
 });
+
+test("get query variables with integer hash key", () => {
+  const filter = {
+    productsByAmount: {
+      amount: 200,
+    },
+  };
+
+  const queryVariables = Filter.getQueryVariables(filter);
+
+  expect(queryVariables).toEqual({
+    amount: 200,
+  });
+});
+
+test("get query variables with integer sort key", () => {
+  const filter = {
+    productsByAmount: {
+      amount: {
+        gt: 100,
+      },
+      productId: "product1",
+    },
+  };
+
+  const queryVariables = Filter.getQueryVariables(filter);
+
+  expect(queryVariables).toEqual({
+    productId: "product1",
+    amount: {
+      gt: 100,
+    },
+  });
+});
