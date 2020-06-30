@@ -32,7 +32,7 @@ export interface DataProviderOptions {
 }
 
 const defaultOptions: DataProviderOptions = {
-  authMode: GRAPHQL_AUTH_MODE.API_KEY,
+  authMode: GRAPHQL_AUTH_MODE.AMAZON_COGNITO_USER_POOLS,
 };
 
 export class DataProvider {

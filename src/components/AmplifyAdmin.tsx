@@ -6,11 +6,11 @@ import { buildAuthProvider, buildDataProvider } from "../providers";
 import { Operations } from "../providers/DataProvider";
 
 export interface AmplifyAdminOptions {
-  adminGroups?: string[];
+  authGroups?: string[];
 }
 
 const defaultOptions: AmplifyAdminOptions = {
-  adminGroups: ["admin"],
+  authGroups: [],
 };
 
 export const AmplifyAdmin: React.FC<{
@@ -21,10 +21,10 @@ export const AmplifyAdmin: React.FC<{
   const [dataProvider, setDataProvider] = useState<DataProvider | null>(null);
 
   const optionsBag = { ...defaultOptions, ...options };
-  const adminGroups = optionsBag.adminGroups as string[];
+  const authGroups = optionsBag.authGroups as string[];
 
   useEffect(() => {
-    const provider = buildAuthProvider({ adminGroups });
+    const provider = buildAuthProvider({ authGroups });
 
     setAuthProvider(() => provider);
   }, []);
