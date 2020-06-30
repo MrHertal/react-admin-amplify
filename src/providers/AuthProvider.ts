@@ -1,20 +1,20 @@
 import { Auth, CognitoUser } from "@aws-amplify/auth";
 
 export interface AuthProviderOptions {
-  adminGroups?: string[];
+  authGroups?: string[];
 }
 
 const defaultOptions: AuthProviderOptions = {
-  adminGroups: ["admin"],
+  authGroups: [],
 };
 
 export class AuthProvider {
-  public adminGroups: string[];
+  public authGroups: string[];
 
   public constructor(options: AuthProviderOptions = defaultOptions) {
     const optionsBag = { ...defaultOptions, ...options };
 
-    this.adminGroups = <string[]>optionsBag.adminGroups;
+    this.authGroups = <string[]>optionsBag.authGroups;
   }
 
   public login = ({
@@ -29,25 +29,59 @@ export class AuthProvider {
     return Auth.signOut();
   };
 
-  public checkAuth = (): Promise<void> => {
-    return Auth.currentAuthenticatedUser();
+  public checkAuth = async (): Promise<void> => {
+    const session = await Auth.currentSession();
+
+    if (this.authGroups.length === 0) {
+      return;
+    }
+
+    const userGroups = session.getAccessToken().decodePayload()[
+      "cognito:groups"
+    ];
+
+    if (!userGroups) {
+      throw new Error("Unauthorized");
+    }
+
+    for (const group of userGroups) {
+      if (this.authGroups.includes(group)) {
+        return;
+      }
+    }
+
+    throw new Error("Unauthorized");
   };
 
-  public checkError = async (error: Record<string, unknown>): Promise<void> => {
-    const status = error.status;
+  public checkError = (error: Record<string, unknown>): Promise<void> => {
+    if (error === null || typeof error !== "object") {
+      return Promise.resolve();
+    }
 
-    if (status === 401 || status === 403) {
-      await Auth.signOut();
-      return Promise.reject();
+    const errors = error.errors;
+
+    if (!errors || !Array.isArray(errors)) {
+      return Promise.resolve();
+    }
+
+    for (const e of errors) {
+      if (e === null || typeof e !== "object") {
+        continue;
+      }
+
+      if (e.errorType === "Unauthorized") {
+        return Promise.reject();
+      }
     }
 
     return Promise.resolve();
   };
 
   public getPermissions = async (): Promise<string[]> => {
-    const user = await Auth.currentAuthenticatedUser();
-    console.log(user);
+    const session = await Auth.currentSession();
 
-    return Promise.resolve(this.adminGroups);
+    const groups = session.getAccessToken().decodePayload()["cognito:groups"];
+
+    return groups ? Promise.resolve(groups) : Promise.reject();
   };
 }
