@@ -1,4 +1,5 @@
 import { Auth, CognitoUser } from "@aws-amplify/auth";
+import { ClientMetaData } from "@aws-amplify/auth/lib-esm/types";
 
 export interface AuthProviderOptions {
   authGroups?: string[];
@@ -20,8 +21,13 @@ export class AuthProvider {
   public login = ({
     username,
     password,
-  }: Record<string, string>): Promise<CognitoUser | unknown> => {
-    return Auth.signIn(username, password);
+    clientMetadata,
+  }: Record<string, unknown>): Promise<CognitoUser | unknown> => {
+    return Auth.signIn(
+      <string>username,
+      <string>password,
+      <ClientMetaData>clientMetadata
+    );
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
