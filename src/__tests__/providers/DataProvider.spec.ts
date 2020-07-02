@@ -77,7 +77,7 @@ test("get list with more than one page", async () => {
   expect(result).toEqual({ data: [], total: 1 });
 });
 
-test("get list with filter and sortering", async () => {
+test("get list with filter and sorting", async () => {
   const mockGraphql = jest.fn(async () => ({
     resourcesByField: {
       items: [],
