@@ -90,7 +90,7 @@ export class DataProvider {
       }; // React admin will redirect to page 1
     }
 
-    // Adds sortering if requested
+    // Adds sorting if requested
     if (params.sort.field === queryName) {
       queryVariables["sortDirection"] = params.sort.order;
     }
