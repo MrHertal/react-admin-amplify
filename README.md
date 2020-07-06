@@ -90,27 +90,11 @@ import * as queries from "./graphql/queries";
 Amplify.configure(awsExports);
 
 function App() {
-  const [authProvider, setAuthProvider] = useState(null);
-  const [dataProvider, setDataProvider] = useState(null);
-
-  useEffect(() => {
-    const provider = buildAuthProvider({ authGroups: ["admin"] });
-
-    setAuthProvider(() => provider);
-  }, []);
-
-  useEffect(() => {
-    const provider = buildDataProvider({ queries, mutations });
-
-    setDataProvider(() => provider);
-  }, []);
-
-  if (!authProvider || !dataProvider) {
-    return <div>Loading</div>;
-  }
-
   return (
-    <Admin authProvider={authProvider} dataProvider={dataProvider}>
+    <Admin
+      authProvider={buildAuthProvider({ authGroups: ["admin"] })}
+      dataProvider={buildDataProvider({ queries, mutations })}
+    >
       <Resource name="orders" />
     </Admin>
   );
@@ -151,7 +135,7 @@ Total count is not supported by Amplify, see <https://github.com/aws-amplify/amp
 
 That means that react-admin default pagination does not suit well. I suggest implementing a prev/next pagination like the one described in react-admin [documentation](https://marmelab.com/react-admin/List.html#pagination).
 
-Alternatively, you can use the pagination of the [demo](https://github.com/MrHertal/react-admin-amplify-demo/blob/master/src/components/Pagination.js). It is basically the same as the react-admin default pagination, except it does not display total count.
+Alternatively, you can use the pagination of the [demo](https://github.com/MrHertal/react-admin-amplify-demo/blob/master/src/components/Pagination.js). It is the same as the react-admin default pagination, except it does not display total count.
 
 ### Filter
 
@@ -331,7 +315,7 @@ Demo source code is here: <https://github.com/MrHertal/react-admin-amplify-demo>
 ### Sorting
 
 Sorting data is possible with the sort key. Since default list queries (like `listOrders`) have no sort key, you cannot sort them.
-Similarly to filters, sorting is therefore based on [@key directives](https://docs.amplify.aws/cli/graphql-transformer/directives#key) set in the GraphQL schema.
+Similarly to filters, sorting is based on [@key directives](https://docs.amplify.aws/cli/graphql-transformer/directives#key) set in the GraphQL schema.
 
 Let's look at `Order` schema again:
 
