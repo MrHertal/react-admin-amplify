@@ -1,4 +1,4 @@
-# React Admin Amplify
+# React Admin Amplify ![GitHub release (latest by date)](https://img.shields.io/github/v/release/MrHertal/react-admin-amplify) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MrHertal/react-admin-amplify/Node.js%20CI)
 
 AWS Amplify data provider for [react-admin](https://github.com/marmelab/react-admin).
 
@@ -80,7 +80,7 @@ Code above is actually the equivalent of:
 ```jsx
 // in App.js
 import { Amplify } from "@aws-amplify/core";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Admin, Resource } from "react-admin";
 import { buildAuthProvider, buildDataProvider } from "react-admin-amplify";
 import awsExports from "./aws-exports";
