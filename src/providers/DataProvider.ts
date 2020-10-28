@@ -174,7 +174,7 @@ export class DataProvider {
 
       filter[splitTarget[0]][splitTarget[1]] = id;
     } else {
-      const queryName = this.getQueryName("list", resource);
+      const queryName = this.getQueryNameMany("list", resource, target);
       if (!filter[queryName]) {
         filter[queryName] = {};
       }
@@ -327,6 +327,18 @@ export class DataProvider {
     return `${operation}${
       resource.charAt(0).toUpperCase() + resource.slice(1, -1)
     }`;
+  }
+
+  public getQueryNameMany(
+    operation: string,
+    resource: string,
+    target: string
+  ): string {
+    const queryName = this.getQueryName(operation, resource);
+
+    return `${queryName}By${
+      target.charAt(0).toUpperCase() + target.slice(1, -2)
+    }Id`;
   }
 
   public async graphql(
