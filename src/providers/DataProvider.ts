@@ -62,7 +62,7 @@ export class DataProvider {
 
     if (!queryName || !queryVariables) {
       // Default list query without filter
-      queryName = `list${resource.charAt(0).toUpperCase() + resource.slice(1)}`;
+      queryName = this.getQueryName("list", resource);
     }
 
     const query = this.getQuery(queryName);
@@ -123,9 +123,7 @@ export class DataProvider {
     resource: string,
     params: GetOneParams
   ): Promise<GetOneResult> => {
-    const queryName = `get${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("get", resource);
     const query = this.getQuery(queryName);
 
     // Executes the query
@@ -140,9 +138,7 @@ export class DataProvider {
     resource: string,
     params: GetManyParams
   ): Promise<GetManyResult> => {
-    const queryName = `get${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("get", resource);
     const query = this.getQuery(queryName);
 
     const queriesData = [];
@@ -166,21 +162,24 @@ export class DataProvider {
     resource: string,
     params: GetManyReferenceParams
   ): Promise<GetManyReferenceResult> => {
-    const target = params.target.split(".");
+    const { filter = {}, id, pagination, sort, target } = params;
+    const splitTarget = target.split(".");
 
-    // Target is used to build the filter
+    // splitTarget is used to build the filter
     // It must be like: queryName.resourceID
-    if (target.length !== 2) {
-      throw new Error("Data provider error");
+    if (splitTarget.length === 2) {
+      if (!filter[splitTarget[0]]) {
+        filter[splitTarget[0]] = {};
+      }
+
+      filter[splitTarget[0]][splitTarget[1]] = id;
+    } else {
+      const queryName = this.getQueryNameMany("list", resource, target);
+      if (!filter[queryName]) {
+        filter[queryName] = {};
+      }
+      filter[queryName][target] = id;
     }
-
-    const { filter, id, pagination, sort } = params;
-
-    if (!filter[target[0]]) {
-      filter[target[0]] = {};
-    }
-
-    filter[target[0]][target[1]] = id;
 
     return this.getList(resource, { pagination, sort, filter });
   };
@@ -189,9 +188,7 @@ export class DataProvider {
     resource: string,
     params: CreateParams
   ): Promise<CreateResult> => {
-    const queryName = `create${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("create", resource);
     const query = this.getQuery(queryName);
 
     // Executes the query
@@ -208,9 +205,7 @@ export class DataProvider {
     resource: string,
     params: UpdateParams
   ): Promise<UpdateResult> => {
-    const queryName = `update${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("update", resource);
     const query = this.getQuery(queryName);
 
     // Removes non editable fields
@@ -234,9 +229,7 @@ export class DataProvider {
     resource: string,
     params: UpdateManyParams
   ): Promise<UpdateManyResult> => {
-    const queryName = `update${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("update", resource);
     const query = this.getQuery(queryName);
 
     // Removes non editable fields
@@ -267,9 +260,7 @@ export class DataProvider {
     resource: string,
     params: DeleteParams
   ): Promise<DeleteResult> => {
-    const queryName = `delete${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("delete", resource);
     const query = this.getQuery(queryName);
 
     const { id, previousData } = params;
@@ -291,9 +282,7 @@ export class DataProvider {
     resource: string,
     params: DeleteManyParams
   ): Promise<DeleteManyResult> => {
-    const queryName = `delete${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
-    }`;
+    const queryName = this.getQueryName("delete", resource);
     const query = this.getQuery(queryName);
 
     const ids = [];
@@ -325,6 +314,31 @@ export class DataProvider {
     console.log(`Could not find query ${queryName}`);
 
     throw new Error("Data provider error");
+  }
+
+  public getQueryName(operation: string, resource: string): string {
+    const pluralOperations = ["list"];
+    if (pluralOperations.includes(operation)) {
+      return `${operation}${
+        resource.charAt(0).toUpperCase() + resource.slice(1)
+      }`;
+    }
+    // else singular operations ["create", "delete", "get", "update"]
+    return `${operation}${
+      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
+    }`;
+  }
+
+  public getQueryNameMany(
+    operation: string,
+    resource: string,
+    target: string
+  ): string {
+    const queryName = this.getQueryName(operation, resource);
+
+    return `${queryName}By${
+      target.charAt(0).toUpperCase() + target.slice(1, -2)
+    }Id`;
   }
 
   public async graphql(
