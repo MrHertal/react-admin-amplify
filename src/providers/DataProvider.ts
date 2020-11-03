@@ -51,10 +51,10 @@ export class DataProvider {
     this.authMode = <GRAPHQL_AUTH_MODE>optionsBag.authMode;
   }
 
-  public getList = async (
+  public getList = async <RecordType>(
     resource: string,
     params: GetListParams
-  ): Promise<GetListResult> => {
+  ): Promise<GetListResult<RecordType>> => {
     const { filter } = params;
 
     let queryName = Filter.getQueryName(this.queries, filter);
@@ -119,10 +119,10 @@ export class DataProvider {
     };
   };
 
-  public getOne = async (
+  public getOne = async <RecordType>(
     resource: string,
     params: GetOneParams
-  ): Promise<GetOneResult> => {
+  ): Promise<GetOneResult<RecordType>> => {
     const queryName = this.getQueryName("get", resource);
     const query = this.getQuery(queryName);
 
@@ -134,10 +134,10 @@ export class DataProvider {
     };
   };
 
-  public getMany = async (
+  public getMany = async <RecordType>(
     resource: string,
     params: GetManyParams
-  ): Promise<GetManyResult> => {
+  ): Promise<GetManyResult<RecordType>> => {
     const queryName = this.getQueryName("get", resource);
     const query = this.getQuery(queryName);
 
@@ -158,10 +158,10 @@ export class DataProvider {
     };
   };
 
-  public getManyReference = async (
+  public getManyReference = async <RecordType>(
     resource: string,
     params: GetManyReferenceParams
-  ): Promise<GetManyReferenceResult> => {
+  ): Promise<GetManyReferenceResult<RecordType>> => {
     const { filter = {}, id, pagination, sort, target } = params;
     const splitTarget = target.split(".");
 
@@ -184,10 +184,10 @@ export class DataProvider {
     return this.getList(resource, { pagination, sort, filter });
   };
 
-  public create = async (
+  public create = async <RecordType>(
     resource: string,
     params: CreateParams
-  ): Promise<CreateResult> => {
+  ): Promise<CreateResult<RecordType>> => {
     const queryName = this.getQueryName("create", resource);
     const query = this.getQuery(queryName);
 
@@ -201,10 +201,10 @@ export class DataProvider {
     };
   };
 
-  public update = async (
+  public update = async <RecordType>(
     resource: string,
     params: UpdateParams
-  ): Promise<UpdateResult> => {
+  ): Promise<UpdateResult<RecordType>> => {
     const queryName = this.getQueryName("update", resource);
     const query = this.getQuery(queryName);
 
@@ -256,10 +256,10 @@ export class DataProvider {
     };
   };
 
-  public delete = async (
+  public delete = async <RecordType>(
     resource: string,
     params: DeleteParams
-  ): Promise<DeleteResult> => {
+  ): Promise<DeleteResult<RecordType>> => {
     const queryName = this.getQueryName("delete", resource);
     const query = this.getQuery(queryName);
 
