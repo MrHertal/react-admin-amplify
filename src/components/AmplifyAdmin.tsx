@@ -5,6 +5,8 @@ import { Operations } from "../providers/DataProvider";
 
 export interface AmplifyAdminOptions {
   authGroups?: string[];
+  storageBucket?: string;
+  storageRegion?: string;
 }
 
 const defaultOptions: AmplifyAdminOptions = {
@@ -16,13 +18,16 @@ export const AmplifyAdmin: React.FC<{
   options?: AmplifyAdminOptions;
 }> = ({ children, operations, options = defaultOptions, ...propsRest }) => {
   const optionsBag = { ...defaultOptions, ...options };
-  const authGroups = optionsBag.authGroups as string[];
+  const { authGroups, storageBucket, storageRegion } = optionsBag;
 
   return (
     <Admin
       {...propsRest}
       authProvider={buildAuthProvider({ authGroups })}
-      dataProvider={buildDataProvider(operations)}
+      dataProvider={buildDataProvider(operations, {
+        storageBucket,
+        storageRegion,
+      })}
     >
       {children}
     </Admin>

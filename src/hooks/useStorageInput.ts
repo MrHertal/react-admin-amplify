@@ -1,78 +1,56 @@
 import { Storage } from "@aws-amplify/storage";
-import { Children, ReactElement, ReactNode } from "react";
+import React from "react";
 import { useInput } from "react-admin";
 import { v4 as uuid } from "uuid";
+import { DataProvider } from "../providers/DataProvider";
 
 type OnDropAccepted = (files: File[], event: any) => void;
-type OnRemove = (file: any) => void;
 
 type Input = {
   source: string;
   multiple?: boolean;
   onDropAcceptedCallback?: OnDropAccepted;
-  onRemoveCallback?: OnRemove;
   storageOptions?: any;
-  children: ReactNode;
 };
 
 type Output = {
   onDropAccepted: OnDropAccepted;
-  onRemove: OnRemove;
 };
 
 export function useStorageInput({
   source,
   multiple = false,
   onDropAcceptedCallback,
-  onRemoveCallback,
   storageOptions = {},
-  children,
 }: Input): Output {
   const { input } = useInput({ source });
+
+  React.useEffect(() => {
+    if (Array.isArray(input.value) && input.value.length === 0) {
+      input.onChange(undefined);
+    }
+  }, [input]);
 
   async function onDropAccepted(files: File[], event: any) {
     try {
       const values = await Promise.all(
         files.map(async (file) => {
-          const { source, title } = (Children.only(children) as ReactElement<
-            any
-          >).props;
-
-          const transformedFile = {
-            rawFile: file,
-            [source]: URL.createObjectURL(file),
-          };
-
-          if (title) {
-            transformedFile[title] = file.name;
-          }
-
           const result = (await Storage.put(
-            `${uuid()}-${file.name}`,
+            `${uuid().replace(/-/g, "")}_${file.name}`,
             file,
             storageOptions
           )) as any;
 
           return {
-            ...transformedFile,
-            s3Key: result.key,
+            bucket: DataProvider.storageBucket,
+            region: DataProvider.storageRegion,
+            key: result.key,
           };
         })
       );
 
       if (!multiple) {
-        if (input.value) {
-          try {
-            await Storage.remove(input.value.s3Key, {
-              level: storageOptions.level || "public",
-            });
-          } catch (e) {
-            console.log(e);
-          }
-        }
-
         input.onChange(values[0]);
-
         return;
       }
 
@@ -91,22 +69,5 @@ export function useStorageInput({
     }
   }
 
-  async function onRemove(file: any) {
-    try {
-      await Storage.remove(file.s3Key, {
-        level: storageOptions.level || "public",
-      });
-    } catch (e) {
-      console.log(e);
-    }
-
-    if (onRemoveCallback) {
-      onRemoveCallback(file);
-    }
-  }
-
-  return {
-    onDropAccepted,
-    onRemove,
-  };
+  return { onDropAccepted };
 }

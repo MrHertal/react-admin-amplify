@@ -1,6 +1,7 @@
 import React from "react";
 import { FileInput } from "react-admin";
 import { useStorageInput } from "../hooks/useStorageInput";
+import { AmplifyFileField } from "./AmplifyFileField";
 
 type Props = {
   source: string;
@@ -12,21 +13,18 @@ type Props = {
 export const AmplifyFileInput: React.FC<Props> = ({
   options = {},
   storageOptions = {},
-  children,
   ...props
 }) => {
-  const { onDropAccepted, onRemove } = useStorageInput({
+  const { onDropAccepted } = useStorageInput({
     source: props.source,
     multiple: props.multiple,
     onDropAcceptedCallback: options.onDropAccepted,
-    onRemoveCallback: options.onRemove,
     storageOptions,
-    children,
   });
 
   return (
-    <FileInput {...props} options={{ ...options, onDropAccepted, onRemove }}>
-      {children}
+    <FileInput {...props} options={{ ...options, onDropAccepted }}>
+      <AmplifyFileField />
     </FileInput>
   );
 };

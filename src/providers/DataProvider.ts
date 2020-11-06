@@ -29,6 +29,8 @@ export interface Operations {
 
 export interface DataProviderOptions {
   authMode?: GRAPHQL_AUTH_MODE;
+  storageBucket?: string;
+  storageRegion?: string;
 }
 
 const defaultOptions: DataProviderOptions = {
@@ -36,6 +38,9 @@ const defaultOptions: DataProviderOptions = {
 };
 
 export class DataProvider {
+  static storageBucket?: string;
+  static storageRegion?: string;
+
   public queries: Record<string, string>;
   public mutations: Record<string, string>;
   public authMode: GRAPHQL_AUTH_MODE;
@@ -48,7 +53,10 @@ export class DataProvider {
 
     this.queries = operations.queries;
     this.mutations = operations.mutations;
-    this.authMode = <GRAPHQL_AUTH_MODE>optionsBag.authMode;
+    this.authMode = optionsBag.authMode as GRAPHQL_AUTH_MODE;
+
+    DataProvider.storageBucket = optionsBag.storageBucket;
+    DataProvider.storageRegion = optionsBag.storageRegion;
   }
 
   public getList = async <RecordType>(
