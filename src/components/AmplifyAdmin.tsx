@@ -1,5 +1,4 @@
 import React from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Admin } from "react-admin";
 import { buildAuthProvider, buildDataProvider } from "../providers";
 import { Operations } from "../providers/DataProvider";

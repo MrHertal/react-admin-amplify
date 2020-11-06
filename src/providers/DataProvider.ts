@@ -344,7 +344,6 @@ export class DataProvider {
   public async graphql(
     query: string,
     variables: Record<string, unknown>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     const queryResult = <GraphQLResult>await API.graphql({
       query,

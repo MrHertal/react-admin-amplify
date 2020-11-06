@@ -8,6 +8,7 @@ module.exports = {
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
+    "plugin:react-hooks/recommended"
   ],
   globals: {
     Atomics: "readonly",
@@ -20,5 +21,8 @@ module.exports = {
   },
   plugins: ["@typescript-eslint"],
   ignorePatterns: [".eslintrc.js", "node_modules/", "build/", "coverage/"],
-  rules: {},
+  rules: {
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-unused-vars": 0
+  },
 };

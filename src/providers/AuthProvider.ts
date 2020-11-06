@@ -30,7 +30,6 @@ export class AuthProvider {
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public logout = (): Promise<any> => {
     return Auth.signOut();
   };
