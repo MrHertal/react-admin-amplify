@@ -45,7 +45,7 @@ npm install react-admin-amplify
 
 ## Usage
 
-Simplest way to set things up is to use the `AdminAmplify` component:
+Simplest way to set things up is to use the `AmplifyAdmin` component:
 
 ```jsx
 // in App.js
