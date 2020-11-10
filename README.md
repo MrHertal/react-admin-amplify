@@ -5,7 +5,10 @@ AWS Amplify data provider for [react-admin](https://github.com/marmelab/react-ad
 - [Installation](#installation)
 - [Usage](#usage)
 - [Options](#options)
-- [Features](#features)
+- [Pagination](#pagination)
+- [Filter](#filter)
+- [Sorting](#sorting)
+- [Storage](#storage)
 
 This library contains the data and auth providers that connect a [react-admin](https://github.com/marmelab/react-admin) frontend to an [Amplify](https://docs.amplify.aws) backend. It also includes some components that make things easier to set up.
 
@@ -27,7 +30,7 @@ On the other hand, the auth provider uses the [Amplify Auth library](https://doc
 
 Please note that your Amplify backend, meaning the `amplify/` folder containing your GraphQL schema, can be located in a different repo than the react-admin one.
 
-Starting from a react-admin project, install the API and Auth libraries:
+Starting from a [react-admin](https://marmelab.com/react-admin/Tutorial.html) project, install the API and Auth libraries:
 
 ```sh
 npm install @aws-amplify/core @aws-amplify/api @aws-amplify/auth
@@ -75,7 +78,7 @@ export default App;
 
 Data and auth providers can also be set independantly using `buildDataProvider` or `buildAuthProvider`.
 
-Code above is actually the equivalent of:
+Code above is the equivalent of:
 
 ```jsx
 // in App.js
@@ -107,7 +110,7 @@ export default App;
 
 ### Auth provider
 
-`authGroups`: array of user groups. Default: `[]`
+`authGroups`: array of user groups, default: `[]`
 
 Restrict access of your react-admin app to users belonging to one of these groups.
 
@@ -117,13 +120,17 @@ For example:
 
 ### Data provider
 
-`authMode`: string. Default: `AMAZON_COGNITO_USER_POOLS`
+`authMode`: string, default: `AMAZON_COGNITO_USER_POOLS`
 
 Authorization mode used by the Amplify GraphQL client.
 
-### AmplifyAdmin
+`storageBucket`: string, optional
 
-`AmplifyAdmin` component only accepts the `authGroups` option, that is passed to the auth provider.
+S3 bucket if using Storage, [see below](#storage).
+
+`storageRegion`: string, optional
+
+S3 region if using Storage, [see below](#storage).
 
 ## Features
 
@@ -139,7 +146,7 @@ Alternatively, you can use the pagination of the [demo](https://github.com/MrHer
 
 ### Filter
 
-In order to use react-admin filters, you will have to correctly set [@key directives](https://docs.amplify.aws/cli/graphql-transformer/directives#key) in your schema.
+In order to use react-admin filters, you will have to correctly set [@key directives](https://docs.amplify.aws/cli/graphql-transformer/key) in your schema.
 
 Let's say you have a GraphQL schema that defines a type `Order`:
 
@@ -256,7 +263,7 @@ const OrderFilter = (props) => (
 
 The source `ordersByProduct.productID` tells the data provider to execute `ordersByProduct` query, passing filter value as `productID` parameter.
 
-### AmplifyFilter
+#### AmplifyFilter
 
 Things become more complex when you want to add several filters.
 
@@ -292,7 +299,7 @@ const OrderFilter = (props) => (
 Please note that `date` field is a sort key, so you need to specify an operator to the query (`eq` in this example).
 
 These filters may be confusing for the users because they would expect to filter orders by product, customer and date at the same time.
-In fact, you need to hide product filter when customer filter is being used, because the query executed is `ordersByCustomerByDate` and not `ordersByProduct`.
+You need to hide product filter when customer filter is being used, because the query executed is `ordersByCustomerByDate` and not `ordersByProduct`.
 
 `AmplifyFilter` component solves this issue by displaying or hiding filters automatically:
 
@@ -315,7 +322,7 @@ Demo source code is here: <https://github.com/MrHertal/react-admin-amplify-demo>
 ### Sorting
 
 Sorting data is possible with the sort key. Since default list queries (like `listOrders`) have no sort key, you cannot sort them.
-Similarly to filters, sorting is based on [@key directives](https://docs.amplify.aws/cli/graphql-transformer/directives#key) set in the GraphQL schema.
+Similarly to filters, sorting is based on [@key directives](https://docs.amplify.aws/cli/graphql-transformer/key) set in the GraphQL schema.
 
 Let's look at `Order` schema again:
 
@@ -355,6 +362,127 @@ export const OrderList = (props) => {
 Just like filters, it is better for users to only allow sorting when it is available. To do that, you have to change dynamically the `sortable` prop, depending on the filter that is applied.
 
 See a working example [on the demo](https://github.com/MrHertal/react-admin-amplify-demo/blob/master/src/components/Order.js).
+
+### Storage
+
+You can use Amplify Storage with that library to manage user files.
+
+First [configure storage](https://docs.amplify.aws/lib/storage/getting-started/q/platform/js) in your Amplify project.
+
+You will need to update your API schema to save files, for example:
+
+```graphql
+type User
+  @model
+  @auth(rules: [
+    { allow: public, operations: [read], provider: iam },
+    { allow: groups, groups: ["superadmin"] }
+  ]) {
+  id: ID!
+  username: String!
+  password: String!
+  picture: S3Object
+  documents: [S3Object!]
+}
+
+type S3Object {
+  bucket: String!
+  region: String!
+  key: String!
+}
+```
+
+`S3Object` is mandatory for the data provider to properly work.
+
+Install the module:
+
+```sh
+npm install @aws-amplify/storage
+```
+
+You can then pass the S3 bucket and region to the data provider:
+
+```jsx
+// in App.js
+import { Amplify } from "@aws-amplify/core";
+import React from "react";
+import { Resource } from "react-admin";
+import { AmplifyAdmin } from "react-admin-amplify";
+import awsExports from "./aws-exports";
+import * as mutations from "./graphql/mutations";
+import * as queries from "./graphql/queries";
+
+Amplify.configure(awsExports);
+
+function App() {
+  return (
+    <AmplifyAdmin
+      operations={{ queries, mutations }}
+      options={{
+        authGroups: ["admin"],
+        storageBucket: awsExports.aws_user_files_s3_bucket,
+        storageRegion: awsExports.aws_user_files_s3_bucket_region,
+      }}
+    >
+      <Resource name="orders" />
+    </AmplifyAdmin>
+  );
+}
+
+export default App;
+```
+
+#### Amplify inputs
+
+```jsx
+import { AmplifyFileInput, AmplifyImageInput} from "react-admin-amplify";
+
+// ...
+
+export const UserCreate = (props) => (
+  <Create {...props}>
+    <SimpleForm>
+      <AmplifyImageInput source="picture" accept="image/*" />
+      <AmplifyFileInput
+        source="documents"
+        accept="application/pdf"
+        multiple={true}
+        storageOptions={{ level: "private" }}
+      />
+    </SimpleForm>
+  </Create>
+);
+);
+```
+
+`AmplifyImageInput` and `AmplifyFileInput` components accept same props as [ImageInput](https://marmelab.com/react-admin/Inputs.html#imageinput) and [FileInput](https://marmelab.com/react-admin/Inputs.html#fileinput).
+
+An additional prop `storageOptions` is available and is passed to [Storage.put](https://docs.amplify.aws/lib/storage/upload/q/platform/js).
+
+#### Amplify fields
+
+```jsx
+import { AmplifyFileField, AmplifyImageField} from "react-admin-amplify";
+
+// ...
+
+export const UserShow = (props) => (
+  <Show {...props}>
+    <SimpleShowLayout>
+      <AmplifyImageField source="picture" title="Avatar" addLabel={true} />
+      <AmplifyFileField
+        source="documents"
+        storageOptions={{ level: "private" }}
+        addLabel={true}
+      />
+    </SimpleShowLayout>
+  </Show>
+);
+```
+
+`AmplifyImageField` and `AmplifyFileField` components accept same props as [ImageField](https://marmelab.com/react-admin/Fields.html#imagefield) and [FileField](https://marmelab.com/react-admin/Fields.html#filefield).
+
+An additional prop `storageOptions` is available and is passed to [Storage.get](https://docs.amplify.aws/lib/storage/download/q/platform/js).
 
 ## TODO
 
