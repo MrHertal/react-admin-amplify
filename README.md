@@ -30,7 +30,7 @@ On the other hand, the auth provider uses the [Amplify Auth library](https://doc
 
 Please note that your Amplify backend, meaning the `amplify/` folder containing your GraphQL schema, can be located in a different repo than the react-admin one.
 
-Starting from a [react-admin](https://marmelab.com/react-admin/Tutorial.html) project, install the API and Auth libraries:
+Starting from a [react-admin](https://marmelab.com/react-admin/Tutorial.html) project, install the Amplify libraries:
 
 ```sh
 npm install @aws-amplify/core @aws-amplify/api @aws-amplify/auth @aws-amplify/storage
