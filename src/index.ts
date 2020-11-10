@@ -1,4 +1,20 @@
-import { AmplifyAdmin, AmplifyFilter } from "./components";
+import {
+  AmplifyAdmin,
+  AmplifyFileField,
+  AmplifyFileInput,
+  AmplifyFilter,
+  AmplifyImageField,
+  AmplifyImageInput,
+} from "./components";
 import { buildAuthProvider, buildDataProvider } from "./providers";
 
-export { AmplifyAdmin, AmplifyFilter, buildAuthProvider, buildDataProvider };
+export {
+  AmplifyAdmin,
+  AmplifyFileField,
+  AmplifyFileInput,
+  AmplifyFilter,
+  AmplifyImageField,
+  AmplifyImageInput,
+  buildAuthProvider,
+  buildDataProvider,
+};

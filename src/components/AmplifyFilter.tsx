@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Filter } from "react-admin";
 
 interface Keys {
@@ -18,7 +17,6 @@ function getKeys(filters: React.ReactNodeArray): Keys {
       throw new Error("AmplifyFilter children are invalid");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const input = filter as any;
 
     if (!input.props || !input.props.source) {
@@ -85,7 +83,6 @@ export const AmplifyFilter: React.FC<{
   // First checks if children source props are well formatted
   const keys = getKeys(filters);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rest = propsRest as any;
 
   const filterValues = rest.filterValues;
@@ -119,7 +116,6 @@ export const AmplifyFilter: React.FC<{
   }
 
   function renderInput(filter: React.ReactNode) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const input = filter as any;
 
     const source = input.props.source;
