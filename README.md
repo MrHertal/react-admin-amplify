@@ -33,7 +33,7 @@ Please note that your Amplify backend, meaning the `amplify/` folder containing 
 Starting from a [react-admin](https://marmelab.com/react-admin/Tutorial.html) project, install the API and Auth libraries:
 
 ```sh
-npm install @aws-amplify/core @aws-amplify/api @aws-amplify/auth
+npm install @aws-amplify/core @aws-amplify/api @aws-amplify/auth @aws-amplify/storage
 ```
 
 You will need the configuration file `aws-exports.js` of your Amplify backend, so that react-admin can connect to your API.
@@ -372,15 +372,9 @@ First [configure storage](https://docs.amplify.aws/lib/storage/getting-started/q
 You will need to update your API schema to save files, for example:
 
 ```graphql
-type User
-  @model
-  @auth(rules: [
-    { allow: public, operations: [read], provider: iam },
-    { allow: groups, groups: ["superadmin"] }
-  ]) {
+type User @model {
   id: ID!
   username: String!
-  password: String!
   picture: S3Object
   documents: [S3Object!]
 }
@@ -394,7 +388,7 @@ type S3Object {
 
 `S3Object` is mandatory for the data provider to properly work.
 
-Install the module:
+Install the storage module if it's not already done:
 
 ```sh
 npm install @aws-amplify/storage
