@@ -1,5 +1,6 @@
 import React from "react";
-import { ImageInput } from "react-admin";
+import { ImageInput, InputProps } from "react-admin";
+import { FileInputOptions, FileInputProps } from "ra-ui-materialui/lib/input/FileInput";
 import { useStorageInput } from "../hooks/useStorageInput";
 import { AmplifyImageField } from "./AmplifyImageField";
 
@@ -10,7 +11,7 @@ type Props = {
   storageOptions?: any;
 };
 
-export const AmplifyImageInput: React.FC<Props> = ({
+export const AmplifyImageInput: React.FC<Props & FileInputProps & InputProps<FileInputOptions>> = ({
   options = {},
   storageOptions = {},
   ...props

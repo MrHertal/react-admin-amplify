@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Filter } from "react-admin";
+import { Filter, FilterProps } from "react-admin";
 
 interface Keys {
   [index: string]: {
@@ -65,7 +65,7 @@ function getKeys(filters: React.ReactNodeArray): Keys {
 export const AmplifyFilter: React.FC<{
   defaultQuery: string;
   setQuery?: React.Dispatch<string>;
-}> = ({ children, defaultQuery, setQuery = null, ...propsRest }) => {
+} & FilterProps> = ({ children, defaultQuery, setQuery = null, ...propsRest }) => {
   let filters;
 
   if (children !== null && typeof children === "object") {
