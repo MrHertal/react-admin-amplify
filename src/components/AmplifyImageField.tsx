@@ -6,9 +6,9 @@ type Props = {
   source?: string;
   record?: any;
   storageOptions?: any;
-};
+} & ImageFieldProps;
 
-export const AmplifyImageField: React.FC<Props & ImageFieldProps> = ({
+export const AmplifyImageField: React.FC<Props> = ({
   source,
   record = {},
   storageOptions = {},

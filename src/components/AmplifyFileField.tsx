@@ -1,15 +1,14 @@
 import React from "react";
-import { FileField } from "react-admin";
-import { FileFieldProps } from "ra-ui-materialui/lib/field/FileField";
+import { FileField, FileFieldProps } from "react-admin";
 import { useStorageField } from "../hooks/useStorageField";
 
 type Props = {
   source?: string;
   record?: any;
   storageOptions?: any;
-};
+} & FileFieldProps;
 
-export const AmplifyFileField: React.FC<Props & FileFieldProps> = ({
+export const AmplifyFileField: React.FC<Props> = ({
   source,
   record = {},
   storageOptions = {},

@@ -62,10 +62,17 @@ function getKeys(filters: React.ReactNodeArray): Keys {
   return keys;
 }
 
-export const AmplifyFilter: React.FC<{
+type Props = {
   defaultQuery: string;
   setQuery?: React.Dispatch<string>;
-} & FilterProps> = ({ children, defaultQuery, setQuery = null, ...propsRest }) => {
+} & FilterProps;
+
+export const AmplifyFilter: React.FC<Props> = ({
+  children,
+  defaultQuery,
+  setQuery = null,
+  ...propsRest
+}) => {
   let filters;
 
   if (children !== null && typeof children === "object") {
