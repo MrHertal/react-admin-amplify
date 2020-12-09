@@ -2,6 +2,7 @@ import React from "react";
 import { Admin } from "react-admin";
 import { buildAuthProvider, buildDataProvider } from "../providers";
 import { Operations } from "../providers/DataProvider";
+import { AdminProps } from "ra-core";
 
 export interface AmplifyAdminOptions {
   authGroups?: string[];
@@ -16,7 +17,7 @@ const defaultOptions: AmplifyAdminOptions = {
 export const AmplifyAdmin: React.FC<{
   operations: Operations;
   options?: AmplifyAdminOptions;
-}> = ({ children, operations, options = defaultOptions, ...propsRest }) => {
+} & Omit<AdminProps, "dataProvider">> = ({ children, operations, options = defaultOptions, ...propsRest }) => {
   const optionsBag = { ...defaultOptions, ...options };
   const { authGroups, storageBucket, storageRegion } = optionsBag;
 

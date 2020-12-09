@@ -1,5 +1,5 @@
 import React from "react";
-import { ImageField } from "react-admin";
+import { ImageField, ImageFieldProps } from "react-admin";
 import { useStorageField } from "../hooks/useStorageField";
 
 type Props = {
@@ -8,7 +8,7 @@ type Props = {
   storageOptions?: any;
 };
 
-export const AmplifyImageField: React.FC<Props> = ({
+export const AmplifyImageField: React.FC<Props & ImageFieldProps> = ({
   source,
   record = {},
   storageOptions = {},

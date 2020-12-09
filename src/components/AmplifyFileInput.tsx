@@ -1,5 +1,5 @@
 import React from "react";
-import { FileInput } from "react-admin";
+import { FileInput, InputProps } from "react-admin";
 import { useStorageInput } from "../hooks/useStorageInput";
 import { AmplifyFileField } from "./AmplifyFileField";
 
@@ -10,7 +10,7 @@ type Props = {
   storageOptions?: any;
 };
 
-export const AmplifyFileInput: React.FC<Props> = ({
+export const AmplifyFileInput: React.FC<Props & InputProps> = ({
   options = {},
   storageOptions = {},
   ...props
