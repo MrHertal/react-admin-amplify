@@ -1,5 +1,9 @@
+import {
+  FileInputOptions,
+  FileInputProps,
+} from "ra-ui-materialui/lib/input/FileInput";
 import React from "react";
-import { FileInput } from "react-admin";
+import { FileInput, InputProps } from "react-admin";
 import { useStorageInput } from "../hooks/useStorageInput";
 import { AmplifyFileField } from "./AmplifyFileField";
 
@@ -8,7 +12,8 @@ type Props = {
   multiple?: boolean;
   options?: any;
   storageOptions?: any;
-};
+} & FileInputProps &
+  InputProps<FileInputOptions>;
 
 export const AmplifyFileInput: React.FC<Props> = ({
   options = {},
