@@ -333,7 +333,7 @@ export class DataProvider {
     }
     // else singular operations ["create", "delete", "get", "update"]
     return `${operation}${
-      resource.charAt(0).toUpperCase() + resource.slice(1, -1)
+      resource.charAt(0).toUpperCase() + resource.slice(1)
     }`;
   }
 
