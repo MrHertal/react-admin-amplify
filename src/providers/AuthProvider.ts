@@ -58,27 +58,7 @@ export class AuthProvider {
     throw new Error("Unauthorized");
   };
 
-  public checkError = (error: Record<string, unknown>): Promise<void> => {
-    if (error === null || typeof error !== "object") {
-      return Promise.resolve();
-    }
-
-    const errors = error.errors;
-
-    if (!errors || !Array.isArray(errors)) {
-      return Promise.resolve();
-    }
-
-    for (const e of errors) {
-      if (e === null || typeof e !== "object") {
-        continue;
-      }
-
-      if (e.errorType === "Unauthorized") {
-        return Promise.reject();
-      }
-    }
-
+  public checkError = (): Promise<void> => {
     return Promise.resolve();
   };
 

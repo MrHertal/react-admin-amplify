@@ -142,8 +142,6 @@ Total count is not supported by Amplify, see <https://github.com/aws-amplify/amp
 
 That means that react-admin default pagination does not suit well. I suggest implementing a prev/next pagination like the one described in react-admin [documentation](https://marmelab.com/react-admin/List.html#pagination).
 
-Alternatively, you can use the pagination of the [demo](https://github.com/MrHertal/react-admin-amplify-demo/blob/master/src/components/Pagination.js). It is the same as the react-admin default pagination, except it does not display total count.
-
 ### Filter
 
 In order to use react-admin filters, you will have to correctly set [@key directives](https://docs.amplify.aws/cli/graphql-transformer/key) in your schema.
