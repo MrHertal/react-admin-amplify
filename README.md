@@ -12,7 +12,7 @@ AWS Amplify data provider for [react-admin](https://github.com/marmelab/react-ad
 
 This library contains the data and auth providers that connect a [react-admin](https://github.com/marmelab/react-admin) frontend to an [Amplify](https://docs.amplify.aws) backend. It also includes some components that make things easier to set up.
 
-A demo is available here: <https://dev.d10isjcm6q3oja.amplifyapp.com>. It demonstrates the use of this library with the [17 patterns GraphQL schema](https://docs.amplify.aws/cli/graphql-transformer/dataaccess).
+A demo is available here: <https://master.d3os44oci7szj2.amplifyapp.com>. It demonstrates the use of this library with the [17 patterns GraphQL schema](https://docs.amplify.aws/cli/graphql-transformer/dataaccess).
 
 Demo source code is here: <https://github.com/MrHertal/react-admin-amplify-demo>.
 
@@ -313,7 +313,7 @@ const OrderFilter = (props) => (
 );
 ```
 
-Check the demo to see it in action: <https://dev.d10isjcm6q3oja.amplifyapp.com>.
+Check the demo to see it in action: <https://master.d3os44oci7szj2.amplifyapp.com>.
 
 Demo source code is here: <https://github.com/MrHertal/react-admin-amplify-demo>.
 
