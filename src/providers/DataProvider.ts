@@ -1,4 +1,3 @@
-import { Auth } from "@aws-amplify/auth";
 import { API, GraphQLResult, GRAPHQL_AUTH_MODE } from "@aws-amplify/api";
 import {
   CreateParams,
@@ -20,6 +19,7 @@ import {
   UpdateParams,
   UpdateResult,
 } from "ra-core";
+import { AdminQueries } from "./AdminQueries";
 import { Filter } from "./Filter";
 import { Pagination } from "./Pagination";
 
@@ -60,107 +60,12 @@ export class DataProvider {
     DataProvider.storageRegion = optionsBag.storageRegion;
   }
 
-  private parseUserAttributes(attributes: { Name: string; Value: unknown }[]) {
-    return attributes.reduce((attributes: any, attribute) => {
-      const { Name, Value } = attribute;
-
-      return {
-        ...attributes,
-        [Name === "sub" ? "id" : Name]: Value,
-      };
-    }, {});
-  }
-
-  private async getUserList<RecordType>(
-    params: GetListParams,
-    groupname?: string
-  ): Promise<GetListResult<RecordType>> {
-    const { pagination, filter } = params;
-    const { page, perPage } = pagination ?? {};
-
-    const queryName = Filter.getQueryName(this.queries, filter);
-    const queryVariables = Filter.getQueryVariables(filter);
-
-    // Defines a unique identifier of the query
-    const querySignature = JSON.stringify({
-      queryName,
-      queryVariables,
-      perPage,
-    });
-
-    const nextToken = Pagination.getNextToken(querySignature, page);
-
-    // Checks if page requested is out of range
-    if (typeof nextToken === "undefined") {
-      return {
-        data: [],
-        total: 0,
-      }; // React admin will redirect to page 1
-    }
-
-    const path = "/listUsers";
-    const data = {
-      queryStringParameters: {
-        groupname: groupname ?? "",
-        limit: perPage,
-        nextToken,
-      },
-      headers: {
-        Authorization: `${(await Auth.currentSession())
-          .getAccessToken()
-          .getJwtToken()}`,
-      },
-    };
-
-    const queryData = await API.get("AdminQueries", path, data);
-
-    const users = queryData.Users.map(({ Attributes }: any) => {
-      return this.parseUserAttributes(Attributes);
-    });
-
-    // Saves next token
-    Pagination.saveNextToken(queryData.nextToken, querySignature, page);
-
-    const total: number =
-      (page - 1) * perPage + queryData.Users.length + !!queryData.nextToken;
-
-    return {
-      data: users,
-      total,
-    };
-  }
-
-  private async getUser<RecordType>(
-    params: GetOneParams
-  ): Promise<GetOneResult<RecordType>> {
-    const path = "/getUser";
-
-    const data = {
-      queryStringParameters: {
-        username: params?.id,
-      },
-      headers: {
-        Authorization: `${(await Auth.currentSession())
-          .getAccessToken()
-          .getJwtToken()}`,
-      },
-    };
-
-    const queryData = await API.get("AdminQueries", path, data);
-
-    const userAttributes = this.parseUserAttributes(queryData.UserAttributes);
-
-    return {
-      data: userAttributes,
-    };
-  }
-
   public getList = async <RecordType>(
     resource: string,
     params: GetListParams
   ): Promise<GetListResult<RecordType>> => {
-    if (resource === "users") {
-      return this.getUserList(params);
+    if (resource === "cognitoUsers") {
+      return AdminQueries.listCognitoUsers(params);
     }
 
     const { filter } = params;
@@ -231,8 +136,8 @@ export class DataProvider {
     resource: string,
     params: GetOneParams
   ): Promise<GetOneResult<RecordType>> => {
-    if (resource === "users") {
-      return this.getUser(params);
+    if (resource === "cognitoUsers") {
+      return AdminQueries.getCognitoUser(params);
     }
 
     const queryName = this.getQueryName("get", resource);
