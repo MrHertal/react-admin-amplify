@@ -68,6 +68,10 @@ export class DataProvider {
       return AdminQueries.listCognitoUsers(params);
     }
 
+    if (resource === "cognitoGroups") {
+      return AdminQueries.listCognitoGroups(params);
+    }
+
     const { filter } = params;
 
     let queryName = Filter.getQueryName(this.queries, filter);
