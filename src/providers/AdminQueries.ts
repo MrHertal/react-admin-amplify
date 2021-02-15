@@ -107,6 +107,77 @@ export class AdminQueries {
     };
   }
 
+  static async listCognitoGroups<RecordType>(
+    params: GetListParams
+  ): Promise<GetListResult<RecordType>> {
+    // Only 1 filter is available with Cognito groups
+    const { listGroupsForUser } = params.filter;
+
+    let queryName = "listGroups";
+    let queryVariables = {};
+
+    // Filter listGroupsForUser
+    // Returns Cognito groups by user
+    if (listGroupsForUser) {
+      queryName = "listGroupsForUser";
+      queryVariables = {
+        username: listGroupsForUser.username,
+      };
+    }
+
+    const { page, perPage } = params.pagination;
+
+    // Defines a unique identifier of the query
+    const querySignature = JSON.stringify({
+      queryName,
+      queryVariables,
+      perPage,
+    });
+
+    const token = Pagination.getNextToken(querySignature, page);
+
+    // Checks if page requested is out of range
+    if (typeof token === "undefined") {
+      return {
+        data: [],
+        total: 0,
+      }; // React admin will redirect to page 1
+    }
+
+    let queryResult = { Groups: [], NextToken: undefined };
+
+    // Executes the query
+    try {
+      queryResult = await AdminQueries.get(`/${queryName}`, {
+        ...queryVariables,
+        limit: perPage,
+        token,
+      });
+    } catch (e) {
+      // Returns 400 when user not found
+      if (!listGroupsForUser || e.response.status !== 400) {
+        throw e;
+      }
+    }
+
+    const groups = queryResult.Groups.map(AdminQueries.parseGroup);
+    const nextToken = queryResult.NextToken || null;
+
+    // Saves next token
+    Pagination.saveNextToken(nextToken, querySignature, page);
+
+    // Computes total
+    let total = (page - 1) * perPage + groups.length;
+    if (nextToken) {
+      total++; // Tells react admin that there is at least one more page
+    }
+
+    return {
+      data: groups,
+      total,
+    };
+  }
+
   static async getCognitoUser<RecordType>(
     params: GetOneParams
   ): Promise<GetOneResult<RecordType>> {
@@ -129,6 +200,12 @@ export class AdminQueries {
     );
 
     return { ...fields, ...attributes, id: Username };
+  }
+
+  static parseGroup(group: any) {
+    const { GroupName, ...fields } = group;
+
+    return { ...fields, id: GroupName };
   }
 
   static parseAttributes(attributes: { Name: string; Value: unknown }[]) {
