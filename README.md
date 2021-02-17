@@ -9,6 +9,7 @@ AWS Amplify data provider for [react-admin](https://github.com/marmelab/react-ad
 - [Filter](#filter)
 - [Sorting](#sorting)
 - [Storage](#storage)
+- [Admin queries](#admin-queries)
 
 This library contains the data and auth providers that connect a [react-admin](https://github.com/marmelab/react-admin) frontend to an [Amplify](https://docs.amplify.aws) backend. It also includes some components that make things easier to set up.
 
@@ -131,6 +132,10 @@ S3 bucket if using Storage, [see below](#storage).
 `storageRegion`: string, optional
 
 S3 region if using Storage, [see below](#storage).
+
+`enableAdminQueries`: boolean, default: `false`
+
+Enables managing Cognito users and groups, [see below](#admin-queries).
 
 ## Features
 
@@ -476,18 +481,89 @@ export const UserShow = (props) => (
 
 An additional prop `storageOptions` is available and is passed to [Storage.get](https://docs.amplify.aws/lib/storage/download/q/platform/js).
 
-## TODO
+### Admin queries
 
-This section is a short list of what could be done to improve this library.
+[Admin queries](https://docs.amplify.aws/cli/auth/admin) allow us to manage users and groups of a Cognito user pool. For example, you can list all signed up users in your react-admin app.
 
-### Admin queries API
+First [configure admin queries](https://docs.amplify.aws/cli/auth/admin#enable-admin-queries) in your Amplify project.
 
-Manage Cognito users within react-admin, using the [admin queries API](https://docs.amplify.aws/cli/auth/admin).
+Then you have to set the data provider option `enableAdminQueries`:
 
-### DataStore
+```jsx
+// in App.js
+import { Amplify } from "@aws-amplify/core";
+import React from "react";
+import { Resource } from "react-admin";
+import { AmplifyAdmin } from "react-admin-amplify";
+import awsExports from "./aws-exports";
+import * as mutations from "./graphql/mutations";
+import * as queries from "./graphql/queries";
 
-Using DataStore instead of API library could bring offline capabilities to the react-admin app.
+Amplify.configure(awsExports);
 
-### @searchable directive
+function App() {
+  return (
+    <AmplifyAdmin
+      operations={{ queries, mutations }}
+      options={{
+        authGroups: ["admin"],
+        enableAdminQueries: true,
+      }}
+    >
+      <Resource name="orders" />
+    </AmplifyAdmin>
+  );
+}
 
-The `@searchable` directive is not yet compatible with the data provider.
+export default App;
+```
+
+It tells the data provider to call the admin queries API when requested resources are `cognitoUsers` or `cognitoGroups`.
+
+You can then add these two resources:
+
+```jsx
+// in App.js
+import { Amplify } from "@aws-amplify/core";
+import React from "react";
+import { Resource } from "react-admin";
+import {
+  AmplifyAdmin,
+  CognitoGroupList,
+  CognitoUserList,
+  CognitoUserShow,
+} from "react-admin-amplify";
+import awsExports from "./aws-exports";
+import * as mutations from "./graphql/mutations";
+import * as queries from "./graphql/queries";
+
+Amplify.configure(awsExports);
+
+function App() {
+  return (
+    <AmplifyAdmin
+      operations={{ queries, mutations }}
+      options={{
+        authGroups: ["admin"],
+        enableAdminQueries: true,
+      }}
+    >
+      <Resource
+        name="cognitoUsers"
+        options={{ label: "Cognito Users" }}
+        list={CognitoUserList}
+        show={CognitoUserShow}
+      />
+      <Resource
+        name="cognitoGroups"
+        options={{ label: "Cognito Groups" }}
+        list={CognitoGroupList}
+      />
+    </AmplifyAdmin>
+  );
+}
+
+export default App;
+```
+
+`CognitoUserList`, `CognitoUserShow` and `CognitoGroupList` are provided by this library to help you quickly setting things up. You can replace them by your own components if you want to add some customizations.
