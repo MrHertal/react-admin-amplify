@@ -35,33 +35,31 @@ export interface DataProviderOptions {
   enableAdminQueries?: boolean;
 }
 
-const defaultOptions: DataProviderOptions = {
+const defaultOptions = {
   authMode: GRAPHQL_AUTH_MODE.AMAZON_COGNITO_USER_POOLS,
   enableAdminQueries: false,
 };
 
 export class DataProvider {
-  static storageBucket?: string;
-  static storageRegion?: string;
-
   public queries: Record<string, string>;
   public mutations: Record<string, string>;
+
   public authMode: GRAPHQL_AUTH_MODE;
   public enableAdminQueries: boolean;
 
-  public constructor(
-    operations: Operations,
-    options: DataProviderOptions = defaultOptions
-  ) {
-    const optionsBag = { ...defaultOptions, ...options };
+  static storageBucket?: string;
+  static storageRegion?: string;
 
+  public constructor(operations: Operations, options?: DataProviderOptions) {
     this.queries = operations.queries;
     this.mutations = operations.mutations;
-    this.authMode = optionsBag.authMode as GRAPHQL_AUTH_MODE;
-    this.enableAdminQueries = optionsBag.enableAdminQueries as boolean;
 
-    DataProvider.storageBucket = optionsBag.storageBucket;
-    DataProvider.storageRegion = optionsBag.storageRegion;
+    this.authMode = options?.authMode || defaultOptions.authMode;
+    this.enableAdminQueries =
+      options?.enableAdminQueries || defaultOptions.enableAdminQueries;
+
+    DataProvider.storageBucket = options?.storageBucket;
+    DataProvider.storageRegion = options?.storageRegion;
   }
 
   public getList = async <RecordType>(

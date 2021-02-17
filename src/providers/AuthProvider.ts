@@ -5,17 +5,15 @@ export interface AuthProviderOptions {
   authGroups?: string[];
 }
 
-const defaultOptions: AuthProviderOptions = {
+const defaultOptions = {
   authGroups: [],
 };
 
 export class AuthProvider {
   public authGroups: string[];
 
-  public constructor(options: AuthProviderOptions = defaultOptions) {
-    const optionsBag = { ...defaultOptions, ...options };
-
-    this.authGroups = <string[]>optionsBag.authGroups;
+  public constructor(options?: AuthProviderOptions) {
+    this.authGroups = options?.authGroups || defaultOptions.authGroups;
   }
 
   public login = ({
