@@ -31,7 +31,7 @@ export class AdminQueries {
         };
       } catch (e) {
         // Returns 400 when user not found
-        if (e.response.status !== 400) {
+        if (e.response?.status !== 400) {
           throw e;
         }
 
@@ -84,7 +84,7 @@ export class AdminQueries {
       });
     } catch (e) {
       // Returns 400 when group not found
-      if (!listUsersInGroup || e.response.status !== 400) {
+      if (!listUsersInGroup || e.response?.status !== 400) {
         throw e;
       }
     }
@@ -155,7 +155,7 @@ export class AdminQueries {
       });
     } catch (e) {
       // Returns 400 when user not found
-      if (!listGroupsForUser || e.response.status !== 400) {
+      if (!listGroupsForUser || e.response?.status !== 400) {
         throw e;
       }
     }

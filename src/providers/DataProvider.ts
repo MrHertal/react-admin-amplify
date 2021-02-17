@@ -32,10 +32,12 @@ export interface DataProviderOptions {
   authMode?: GRAPHQL_AUTH_MODE;
   storageBucket?: string;
   storageRegion?: string;
+  enableAdminQueries?: boolean;
 }
 
 const defaultOptions: DataProviderOptions = {
   authMode: GRAPHQL_AUTH_MODE.AMAZON_COGNITO_USER_POOLS,
+  enableAdminQueries: false,
 };
 
 export class DataProvider {
@@ -45,6 +47,7 @@ export class DataProvider {
   public queries: Record<string, string>;
   public mutations: Record<string, string>;
   public authMode: GRAPHQL_AUTH_MODE;
+  public enableAdminQueries: boolean;
 
   public constructor(
     operations: Operations,
@@ -55,6 +58,7 @@ export class DataProvider {
     this.queries = operations.queries;
     this.mutations = operations.mutations;
     this.authMode = optionsBag.authMode as GRAPHQL_AUTH_MODE;
+    this.enableAdminQueries = optionsBag.enableAdminQueries as boolean;
 
     DataProvider.storageBucket = optionsBag.storageBucket;
     DataProvider.storageRegion = optionsBag.storageRegion;
@@ -64,11 +68,11 @@ export class DataProvider {
     resource: string,
     params: GetListParams
   ): Promise<GetListResult<RecordType>> => {
-    if (resource === "cognitoUsers") {
+    if (this.enableAdminQueries && resource === "cognitoUsers") {
       return AdminQueries.listCognitoUsers(params);
     }
 
-    if (resource === "cognitoGroups") {
+    if (this.enableAdminQueries && resource === "cognitoGroups") {
       return AdminQueries.listCognitoGroups(params);
     }
 
@@ -140,7 +144,7 @@ export class DataProvider {
     resource: string,
     params: GetOneParams
   ): Promise<GetOneResult<RecordType>> => {
-    if (resource === "cognitoUsers") {
+    if (this.enableAdminQueries && resource === "cognitoUsers") {
       return AdminQueries.getCognitoUser(params);
     }
 
