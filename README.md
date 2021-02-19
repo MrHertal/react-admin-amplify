@@ -487,6 +487,8 @@ An additional prop `storageOptions` is available and is passed to [Storage.get](
 
 First [configure admin queries](https://docs.amplify.aws/cli/auth/admin#enable-admin-queries) in your Amplify project.
 
+Don't forget to update the configuration file `aws-exports.js` if it was imported from another project.
+
 Then you have to set the data provider option `enableAdminQueries`:
 
 ```jsx
@@ -567,3 +569,7 @@ export default App;
 ```
 
 `CognitoUserList`, `CognitoUserShow` and `CognitoGroupList` are provided by this library to help you quickly setting things up. You can replace them by your own components if you want to add some customizations.
+
+## License
+
+MIT

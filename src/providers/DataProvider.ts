@@ -161,6 +161,10 @@ export class DataProvider {
     resource: string,
     params: GetManyParams
   ): Promise<GetManyResult<RecordType>> => {
+    if (this.enableAdminQueries && resource === "cognitoUsers") {
+      return AdminQueries.getManyCognitoUsers(params);
+    }
+
     const queryName = this.getQueryName("get", resource);
     const query = this.getQuery(queryName);
 
