@@ -3,6 +3,8 @@ import { Auth } from "@aws-amplify/auth";
 import {
   GetListParams,
   GetListResult,
+  GetManyParams,
+  GetManyResult,
   GetOneParams,
   GetOneResult,
 } from "ra-core";
@@ -181,6 +183,7 @@ export class AdminQueries {
   static async getCognitoUser<RecordType>(
     params: GetOneParams
   ): Promise<GetOneResult<RecordType>> {
+    // Executes the query
     const userData = await AdminQueries.get("/getUser", {
       username: params.id,
     });
@@ -189,6 +192,31 @@ export class AdminQueries {
 
     return {
       data: user,
+    };
+  }
+
+  static async getManyCognitoUsers<RecordType>(
+    params: GetManyParams
+  ): Promise<GetManyResult<RecordType>> {
+    const users = [];
+
+    // Executes the queries
+    for (const id of params.ids) {
+      try {
+        const userData = await AdminQueries.get("/getUser", {
+          username: id,
+        });
+
+        const user = AdminQueries.parseUser(userData);
+
+        users.push(user);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    return {
+      data: users,
     };
   }
 
