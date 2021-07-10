@@ -1,6 +1,6 @@
 {
   "name": "react-admin-amplify",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "AWS Amplify data provider for react-admin.",
   "repository": {
     "type": "git",
