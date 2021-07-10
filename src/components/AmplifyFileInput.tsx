@@ -29,7 +29,7 @@ export const AmplifyFileInput: React.FC<Props> = ({
 
   return (
     <FileInput {...props} options={{ ...options, onDropAccepted }}>
-      <AmplifyFileField />
+      <AmplifyFileField storageOptions={storageOptions} />
     </FileInput>
   );
 };

@@ -29,7 +29,7 @@ export const AmplifyImageInput: React.FC<Props> = ({
 
   return (
     <ImageInput {...props} options={{ ...options, onDropAccepted }}>
-      <AmplifyImageField />
+      <AmplifyImageField storageOptions={storageOptions} />
     </ImageInput>
   );
 };
