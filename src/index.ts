@@ -12,6 +12,8 @@ import {
   CognitoUserShowTitle,
 } from "./components/CognitoUser";
 import { buildAuthProvider, buildDataProvider } from "./providers";
+import { DataProvider } from "./providers/DataProvider";
+import { AuthProvider } from "./providers/AuthProvider";
 
 export {
   AmplifyAdmin,
@@ -27,4 +29,6 @@ export {
   CognitoUserShowTitle,
   buildAuthProvider,
   buildDataProvider,
+  DataProvider,
+  AuthProvider,
 };
