@@ -14,6 +14,7 @@ import {
 import { buildAuthProvider, buildDataProvider } from "./providers";
 import { DataProvider } from "./providers/DataProvider";
 import { AuthProvider } from "./providers/AuthProvider";
+import { Pagination } from "./providers/Pagination";
 
 export {
   AmplifyAdmin,
@@ -31,4 +32,5 @@ export {
   buildDataProvider,
   DataProvider,
   AuthProvider,
+  Pagination,
 };
