@@ -7,11 +7,12 @@ import {
   GetManyResult,
   GetOneParams,
   GetOneResult,
+  Record as RaRecord,
 } from "ra-core";
 import { Pagination } from "./Pagination";
 
 export class AdminQueries {
-  static async listCognitoUsers<RecordType>(
+  static async listCognitoUsers<RecordType extends RaRecord = RaRecord>(
     params: GetListParams
   ): Promise<GetListResult<RecordType>> {
     // Only 2 filters are available with Cognito users
@@ -109,7 +110,7 @@ export class AdminQueries {
     };
   }
 
-  static async listCognitoGroups<RecordType>(
+  static async listCognitoGroups<RecordType extends RaRecord = RaRecord>(
     params: GetListParams
   ): Promise<GetListResult<RecordType>> {
     // Only 1 filter is available with Cognito groups
@@ -180,7 +181,7 @@ export class AdminQueries {
     };
   }
 
-  static async getCognitoUser<RecordType>(
+  static async getCognitoUser<RecordType extends RaRecord = RaRecord>(
     params: GetOneParams
   ): Promise<GetOneResult<RecordType>> {
     // Executes the query
@@ -195,7 +196,7 @@ export class AdminQueries {
     };
   }
 
-  static async getManyCognitoUsers<RecordType>(
+  static async getManyCognitoUsers<RecordType extends RaRecord = RaRecord>(
     params: GetManyParams
   ): Promise<GetManyResult<RecordType>> {
     const users = [];

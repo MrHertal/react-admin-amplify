@@ -18,6 +18,7 @@ import {
   UpdateManyResult,
   UpdateParams,
   UpdateResult,
+  Record as RaRecord,
 } from "ra-core";
 import { AdminQueries } from "./AdminQueries";
 import { Filter } from "./Filter";
@@ -62,7 +63,7 @@ export class DataProvider {
     DataProvider.storageRegion = options?.storageRegion;
   }
 
-  public getList = async <RecordType>(
+  public getList = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: GetListParams
   ): Promise<GetListResult<RecordType>> => {
@@ -138,7 +139,7 @@ export class DataProvider {
     };
   };
 
-  public getOne = async <RecordType>(
+  public getOne = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: GetOneParams
   ): Promise<GetOneResult<RecordType>> => {
@@ -157,7 +158,7 @@ export class DataProvider {
     };
   };
 
-  public getMany = async <RecordType>(
+  public getMany = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: GetManyParams
   ): Promise<GetManyResult<RecordType>> => {
@@ -185,7 +186,7 @@ export class DataProvider {
     };
   };
 
-  public getManyReference = async <RecordType>(
+  public getManyReference = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: GetManyReferenceParams
   ): Promise<GetManyReferenceResult<RecordType>> => {
@@ -211,7 +212,7 @@ export class DataProvider {
     return this.getList(resource, { pagination, sort, filter });
   };
 
-  public create = async <RecordType>(
+  public create = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: CreateParams
   ): Promise<CreateResult<RecordType>> => {
@@ -228,7 +229,7 @@ export class DataProvider {
     };
   };
 
-  public update = async <RecordType>(
+  public update = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: UpdateParams
   ): Promise<UpdateResult<RecordType>> => {
@@ -283,7 +284,7 @@ export class DataProvider {
     };
   };
 
-  public delete = async <RecordType>(
+  public delete = async <RecordType extends RaRecord = RaRecord>(
     resource: string,
     params: DeleteParams
   ): Promise<DeleteResult<RecordType>> => {
@@ -293,7 +294,7 @@ export class DataProvider {
     const { id, previousData } = params;
     const data = { id } as Record<string, unknown>;
 
-    if (previousData._version) {
+    if (previousData?._version) {
       data._version = previousData._version;
     }
 
