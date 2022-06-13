@@ -1,5 +1,5 @@
-import { Storage } from "@aws-amplify/storage";
-import React from "react";
+import { Storage } from "aws-amplify";
+import { useEffect, useState } from "react";
 
 type Input = {
   source?: string;
@@ -19,9 +19,9 @@ export function useStorageField({
   record = {},
   storageOptions = {},
 }: Input): FieldProps {
-  const [fieldProps, setFieldProps] = React.useState<FieldProps>(null);
+  const [fieldProps, setFieldProps] = useState<FieldProps>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function getUrl(key: string) {
       return await Storage.get(key, storageOptions);
     }
