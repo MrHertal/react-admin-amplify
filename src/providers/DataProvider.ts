@@ -14,6 +14,7 @@ import {
   GetManyResult,
   GetOneParams,
   GetOneResult,
+  HttpError,
   UpdateManyParams,
   UpdateManyResult,
   UpdateParams,
@@ -152,6 +153,10 @@ export class DataProvider {
     // Executes the query
     const queryData = (await this.graphql(query, { id: params.id }))[queryName];
 
+    if (!queryData) {
+      throw new HttpError("Not found", 404);
+    }
+
     return {
       data: queryData,
     };
@@ -172,11 +177,10 @@ export class DataProvider {
 
     // Executes the queries
     for (const id of params.ids) {
-      try {
-        const queryData = (await this.graphql(query, { id }))[queryName];
+      const queryData = (await this.graphql(query, { id }))[queryName];
+
+      if (queryData) {
         queriesData.push(queryData);
-      } catch (e) {
-        console.log(e);
       }
     }
 
