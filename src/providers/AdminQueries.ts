@@ -11,9 +11,7 @@ import {
 import { Pagination } from "./Pagination";
 
 export class AdminQueries {
-  static async listCognitoUsers<RecordType>(
-    params: GetListParams
-  ): Promise<GetListResult<RecordType>> {
+  static async listCognitoUsers(params: GetListParams): Promise<GetListResult> {
     // Only 2 filters are available with Cognito users
     const { getUser, listUsersInGroup } = params.filter;
 
@@ -109,9 +107,9 @@ export class AdminQueries {
     };
   }
 
-  static async listCognitoGroups<RecordType>(
+  static async listCognitoGroups(
     params: GetListParams
-  ): Promise<GetListResult<RecordType>> {
+  ): Promise<GetListResult> {
     // Only 1 filter is available with Cognito groups
     const { listGroupsForUser } = params.filter;
 
@@ -180,9 +178,7 @@ export class AdminQueries {
     };
   }
 
-  static async getCognitoUser<RecordType>(
-    params: GetOneParams
-  ): Promise<GetOneResult<RecordType>> {
+  static async getCognitoUser(params: GetOneParams): Promise<GetOneResult> {
     // Executes the query
     const userData = await AdminQueries.get("/getUser", {
       username: params.id,
@@ -195,9 +191,9 @@ export class AdminQueries {
     };
   }
 
-  static async getManyCognitoUsers<RecordType>(
+  static async getManyCognitoUsers(
     params: GetManyParams
-  ): Promise<GetManyResult<RecordType>> {
+  ): Promise<GetManyResult> {
     const users = [];
 
     // Executes the queries

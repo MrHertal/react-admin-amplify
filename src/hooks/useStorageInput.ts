@@ -1,5 +1,5 @@
-import { Storage } from "@aws-amplify/storage";
-import React from "react";
+import { Storage } from "aws-amplify";
+import { useEffect } from "react";
 import { useInput } from "react-admin";
 import { v4 as uuid } from "uuid";
 import { DataProvider } from "../providers/DataProvider";
@@ -23,13 +23,13 @@ export function useStorageInput({
   onDropAcceptedCallback,
   storageOptions = {},
 }: Input): Output {
-  const { input } = useInput({ source });
+  const { field } = useInput({ source });
 
-  React.useEffect(() => {
-    if (Array.isArray(input.value) && input.value.length === 0) {
-      input.onChange(undefined);
+  useEffect(() => {
+    if (Array.isArray(field.value) && field.value.length === 0) {
+      field.onChange(undefined);
     }
-  }, [input]);
+  }, [field]);
 
   async function onDropAccepted(files: File[], event: any) {
     try {
@@ -50,18 +50,18 @@ export function useStorageInput({
       );
 
       if (!multiple) {
-        input.onChange(values[0]);
+        field.onChange(values[0]);
         return;
       }
 
-      if (input.value) {
-        input.onChange([...input.value, ...values]);
+      if (field.value) {
+        field.onChange([...field.value, ...values]);
       } else {
-        input.onChange(values);
+        field.onChange(values);
       }
     } catch (e) {
       console.log(e);
-      input.onChange(undefined);
+      field.onChange(undefined);
     }
 
     if (onDropAcceptedCallback) {

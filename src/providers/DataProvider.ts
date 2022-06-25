@@ -14,6 +14,7 @@ import {
   GetManyResult,
   GetOneParams,
   GetOneResult,
+  HttpError,
   UpdateManyParams,
   UpdateManyResult,
   UpdateParams,
@@ -62,10 +63,10 @@ export class DataProvider {
     DataProvider.storageRegion = options?.storageRegion;
   }
 
-  public getList = async <RecordType>(
+  public getList = async (
     resource: string,
     params: GetListParams
-  ): Promise<GetListResult<RecordType>> => {
+  ): Promise<GetListResult> => {
     if (this.enableAdminQueries && resource === "cognitoUsers") {
       return AdminQueries.listCognitoUsers(params);
     }
@@ -138,10 +139,10 @@ export class DataProvider {
     };
   };
 
-  public getOne = async <RecordType>(
+  public getOne = async (
     resource: string,
     params: GetOneParams
-  ): Promise<GetOneResult<RecordType>> => {
+  ): Promise<GetOneResult> => {
     if (this.enableAdminQueries && resource === "cognitoUsers") {
       return AdminQueries.getCognitoUser(params);
     }
@@ -152,15 +153,19 @@ export class DataProvider {
     // Executes the query
     const queryData = (await this.graphql(query, { id: params.id }))[queryName];
 
+    if (!queryData) {
+      throw new HttpError("Not found", 404);
+    }
+
     return {
       data: queryData,
     };
   };
 
-  public getMany = async <RecordType>(
+  public getMany = async (
     resource: string,
     params: GetManyParams
-  ): Promise<GetManyResult<RecordType>> => {
+  ): Promise<GetManyResult> => {
     if (this.enableAdminQueries && resource === "cognitoUsers") {
       return AdminQueries.getManyCognitoUsers(params);
     }
@@ -172,11 +177,10 @@ export class DataProvider {
 
     // Executes the queries
     for (const id of params.ids) {
-      try {
-        const queryData = (await this.graphql(query, { id }))[queryName];
+      const queryData = (await this.graphql(query, { id }))[queryName];
+
+      if (queryData) {
         queriesData.push(queryData);
-      } catch (e) {
-        console.log(e);
       }
     }
 
@@ -185,10 +189,10 @@ export class DataProvider {
     };
   };
 
-  public getManyReference = async <RecordType>(
+  public getManyReference = async (
     resource: string,
     params: GetManyReferenceParams
-  ): Promise<GetManyReferenceResult<RecordType>> => {
+  ): Promise<GetManyReferenceResult> => {
     const { filter = {}, id, pagination, sort, target } = params;
     const splitTarget = target.split(".");
 
@@ -211,10 +215,10 @@ export class DataProvider {
     return this.getList(resource, { pagination, sort, filter });
   };
 
-  public create = async <RecordType>(
+  public create = async (
     resource: string,
     params: CreateParams
-  ): Promise<CreateResult<RecordType>> => {
+  ): Promise<CreateResult> => {
     const queryName = this.getQueryName("create", resource);
     const query = this.getQuery(queryName);
 
@@ -228,10 +232,10 @@ export class DataProvider {
     };
   };
 
-  public update = async <RecordType>(
+  public update = async (
     resource: string,
     params: UpdateParams
-  ): Promise<UpdateResult<RecordType>> => {
+  ): Promise<UpdateResult> => {
     const queryName = this.getQueryName("update", resource);
     const query = this.getQuery(queryName);
 
@@ -283,10 +287,10 @@ export class DataProvider {
     };
   };
 
-  public delete = async <RecordType>(
+  public delete = async (
     resource: string,
     params: DeleteParams
-  ): Promise<DeleteResult<RecordType>> => {
+  ): Promise<DeleteResult> => {
     const queryName = this.getQueryName("delete", resource);
     const query = this.getQuery(queryName);
 

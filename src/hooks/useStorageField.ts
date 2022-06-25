@@ -1,5 +1,6 @@
-import { Storage } from "@aws-amplify/storage";
-import React from "react";
+import { Storage } from "aws-amplify";
+import { useEffect, useState } from "react";
+import { useRecordContext } from "react-admin";
 
 type Input = {
   source?: string;
@@ -16,43 +17,14 @@ type FieldProps = {
 
 export function useStorageField({
   source,
-  record = {},
+  record: file = {},
   storageOptions = {},
 }: Input): FieldProps {
-  const [fieldProps, setFieldProps] = React.useState<FieldProps>(null);
+  const [fieldProps, setFieldProps] = useState<FieldProps>(null);
+  const record = useRecordContext();
 
-  React.useEffect(() => {
-    async function getUrl(key: string) {
-      return await Storage.get(key, storageOptions);
-    }
-
-    // Case when using the field within an AmplifyInput
-    if (!source) {
-      if (!record.key) {
-        return;
-      }
-
-      getUrl(record.key)
-        .then((url) => {
-          if (typeof url !== "string") {
-            return;
-          }
-
-          const updatedRecord = { ...record };
-          updatedRecord._url = url;
-
-          setFieldProps({
-            source: "_url",
-            record: updatedRecord,
-            title: record.key.split(/_(.+)/)[1],
-          });
-        })
-        .catch(() => {});
-
-      return;
-    }
-
-    if (!record[source]) {
+  useEffect(() => {
+    if (!source || !record[source]) {
       return;
     }
 
@@ -64,7 +36,7 @@ export function useStorageField({
             return;
           }
 
-          const url = await getUrl(value.key);
+          const url = await Storage.get(value.key, storageOptions);
 
           if (typeof url !== "string") {
             return;
@@ -76,19 +48,17 @@ export function useStorageField({
             _title: value.key.split(/_(.+)/)[1],
           };
         })
-      )
-        .then((values) => {
-          const updatedRecord = { ...record };
-          updatedRecord[source] = values.filter((v) => !!v);
+      ).then((values) => {
+        const updatedRecord = { ...record };
+        updatedRecord[source] = values.filter((v) => !!v);
 
-          setFieldProps({
-            source,
-            record: updatedRecord,
-            title: "_title",
-            src: "_url",
-          });
-        })
-        .catch(() => {});
+        setFieldProps({
+          source,
+          record: updatedRecord,
+          title: "_title",
+          src: "_url",
+        });
+      });
 
       return;
     }
@@ -98,24 +68,45 @@ export function useStorageField({
     }
 
     // Default case when rendering a single file
-    getUrl(record[source].key)
-      .then((url) => {
-        if (typeof url !== "string") {
-          return;
-        }
+    Storage.get(record[source].key, storageOptions).then((url: any) => {
+      if (typeof url !== "string") {
+        return;
+      }
 
-        const updatedRecord = { ...record };
-        updatedRecord[source]._url = url;
+      const updatedRecord = { ...record };
+      updatedRecord[source]._url = url;
 
-        setFieldProps({
-          source: `${source}._url`,
-          record: updatedRecord,
-          title: record[source].key.split(/_(.+)/)[1],
-        });
-      })
-      .catch(() => {});
+      setFieldProps({
+        source: `${source}._url`,
+        record: updatedRecord,
+        title: record[source].key.split(/_(.+)/)[1],
+      });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [record.key]);
+  }, []);
+
+  // Field within an AmplifyInput
+  useEffect(() => {
+    if (source || !file.key) {
+      return;
+    }
+
+    Storage.get(file.key, storageOptions).then((url: any) => {
+      if (typeof url !== "string") {
+        return;
+      }
+
+      const updatedFile = { ...file };
+      updatedFile._url = url;
+
+      setFieldProps({
+        source: "_url",
+        record: updatedFile,
+        title: file.key.split(/_(.+)/)[1],
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file.key]);
 
   return fieldProps;
 }

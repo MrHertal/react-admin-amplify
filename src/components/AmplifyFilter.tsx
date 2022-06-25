@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Filter, FilterProps } from "react-admin";
+import { Filter, FilterProps, useListContext } from "react-admin";
 
 interface Keys {
   [index: string]: {
@@ -9,7 +9,7 @@ interface Keys {
 }
 
 // Extracts hash and sort keys from source props
-function getKeys(filters: React.ReactNodeArray): Keys {
+function getKeys(filters: React.ReactElement[]): Keys {
   const keys = {};
 
   for (const filter of filters) {
@@ -17,13 +17,11 @@ function getKeys(filters: React.ReactNodeArray): Keys {
       throw new Error("AmplifyFilter children are invalid");
     }
 
-    const input = filter as any;
-
-    if (!input.props || !input.props.source) {
+    if (!filter.props || !filter.props.source) {
       throw new Error("AmplifyFilter children are invalid");
     }
 
-    const source = input.props.source;
+    const source = filter.props.source;
     const sourceSplit = source.split(".");
 
     // A dot must seperate the query name and the key name
@@ -73,6 +71,8 @@ export const AmplifyFilter: React.FC<Props> = ({
   setQuery = null,
   ...propsRest
 }) => {
+  const { filterValues, setFilters, displayedFilters } = useListContext();
+
   let filters;
 
   if (children !== null && typeof children === "object") {
@@ -90,11 +90,6 @@ export const AmplifyFilter: React.FC<Props> = ({
   // First checks if children source props are well formatted
   const keys = getKeys(filters);
 
-  const rest = propsRest as any;
-
-  const filterValues = rest.filterValues;
-  const setFilters = rest.setFilters;
-
   // Determines which query will be executed depending on the filter
   let query = defaultQuery;
   if (Object.keys(filterValues).length === 1) {
@@ -104,7 +99,7 @@ export const AmplifyFilter: React.FC<Props> = ({
 
     // Case when filter values do not contain mandatory hash key
     if (!filterHashKey && setFilters) {
-      setFilters({});
+      setFilters({}, displayedFilters);
     }
   }
 
@@ -139,5 +134,5 @@ export const AmplifyFilter: React.FC<Props> = ({
     return showFilter(queryName) && notBlank(hashKeySource) && input;
   }
 
-  return <Filter {...rest}>{filters.map(renderInput)}</Filter>;
+  return <Filter {...propsRest}>{filters.map(renderInput)}</Filter>;
 };
