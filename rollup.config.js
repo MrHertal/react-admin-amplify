@@ -36,5 +36,5 @@ export default {
       include: ["node_modules/**"],
     }),
   ],
-  external: ["@aws-amplify/api", "@aws-amplify/auth"],
+  external: ["@aws-amplify/api", "@aws-amplify/auth", "ra-core"],
 };
